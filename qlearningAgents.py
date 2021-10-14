@@ -62,6 +62,8 @@ class QLearningAgent(ReinforcementAgent):
           terminal state, you should return a value of 0.0.
         """
         "*** YOUR CODE HERE ***"
+        succs= state.getSuccessors()
+        print succs
         util.raiseNotDefined()
 
     def computeActionFromQValues(self, state):
@@ -71,6 +73,10 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
+        succs= state.getSuccessors()
+        print "HERE"
+        print succs
+        
         util.raiseNotDefined()
 
     def getAction(self, state):

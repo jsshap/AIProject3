@@ -50,18 +50,30 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         lambd = 0
 
+        for s in self.mdp.getStates():
+            self.values[s] = 0
 
+        print "we're in this method", self.iterations
         for i in range (self.iterations):
             self.values = self.values_prime
+            lambd = 0
             for s in mdp.getStates():
                 max = 0
-                vals = []
-                for a in mdp.getPossibleActions(s):
-                    nexts = mdp.getTransitionStatesAndProbs(s, a)
-                    t =  self.discount*sum([n[1]*self.valuesn[0]+ mdp.getReward(s,a,n[0]) for n in nexts])
-                    if t>max:
-                        max = t
-                self.values_prime[s] = max
+                for a in self.mdp.getPossibleActions(s):
+                    sum = 0
+                    nexts = self.mdp.getTransitionStatesAndProbs(s, a)
+                    #t =  self.discount*sum([n[1]*self.values_prime[0]+ self.mdp.getReward(s,a,n[0]) for n in nexts])
+
+                    for newState in nexts:
+                        prob = newState[1]
+                        state = newState[0]
+                        reward = self.mdp.getReward(s, a, state)
+                        sum += prob*self.values[newState] 
+                        #should we do the reward here? it's the only place that makes sense
+
+                    if sum>max:
+                        max = sum
+                self.values_prime[s] = max + self.mdp.getReward(s,None, None)#problem: reward function requires more args than we have
                 if self.values_prime[s] - self.values[s] > lambd:
                     lambd = self.values_prime[s] - self.values[s]
             # if lambd <  (epsilon*(1-self.discount))/self.discount:
@@ -87,7 +99,19 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
+        succs = self.mdp.getTransitionStatesAndProbs(state, action)
+        #list of (state, prob)
+        total =0
+        #print succs
+        for s in succs:
+            #print self.values[s[0]]
+            total += s[1] * self.values[s[0]]
+        #print total
+        #add reward in this state and gamma * future reward
+        currentReward = self.mdp.getReward(state, None, None)
+        future = self.discount * total
+        return future + currentReward
+
 
     def computeActionFromValues(self, state):
         """
@@ -99,8 +123,18 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
+        if self.values[state] == 0:
+            return None
 
-        return self.values[state]
+        bestScore = 0
+        bestMove = None
+        actions = self.mdp.getPossibleActions(state)
+        for a in actions:
+            if self.computeQValueFromValues(state, a)> bestScore:
+                bestMove = a
+                bestScore = 0
+
+        return bestMove
         
 
     def getPolicy(self, state):

@@ -43,47 +43,44 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
 
-        self.values_prime = util.Counter()
+        self.values_prime = self.values
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
 
-        lambd = 0
 
-        for s in self.mdp.getStates():
-            self.values[s] = 0
+        # if self.iterations > 0:
+        #     self.iterations += 2
 
-        print "we're in this method", self.iterations
         for i in range (self.iterations):
             self.values = self.values_prime
-            lambd = 0
+            #print self.values
             for s in mdp.getStates():
                 max = 0
                 for a in self.mdp.getPossibleActions(s):
                     sum = 0
                     nexts = self.mdp.getTransitionStatesAndProbs(s, a)
                     #t =  self.discount*sum([n[1]*self.values_prime[0]+ self.mdp.getReward(s,a,n[0]) for n in nexts])
-
                     for newState in nexts:
+                        
                         prob = newState[1]
-                        state = newState[0]
-                        reward = self.mdp.getReward(s, a, state)
-                        sum += prob*self.values[newState] 
-                        #should we do the reward here? it's the only place that makes sense
+                        #print prob
+                        nextState = newState[0]
+                        #print self.values[nextState]
+                        sum += prob*self.values[nextState] 
+                        #newState lasts longer before breaking
+                        #?????
+                    # print nexts
+                    # print sum
 
                     if sum>max:
                         max = sum
-                self.values_prime[s] = max + self.mdp.getReward(s,None, None)#problem: reward function requires more args than we have
-                if self.values_prime[s] - self.values[s] > lambd:
-                    lambd = self.values_prime[s] - self.values[s]
-            # if lambd <  (epsilon*(1-self.discount))/self.discount:
-            #     break   
 
-
-
-                
-
-
+                if self.mdp.isTerminal(s):
+                    self.values_prime[s] = self.mdp.getReward(s,None,None)
+                else:
+                    print self.discount * (max) + (self.mdp.getReward(s,None, None)), "JAKE"
+                    self.values_prime[s] = self.discount * (max) + (self.mdp.getReward(s,None, None))
 
 
     def getValue(self, state):
@@ -123,16 +120,15 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        if self.values[state] == 0:
-            return None
 
         bestScore = 0
         bestMove = None
         actions = self.mdp.getPossibleActions(state)
         for a in actions:
-            if self.computeQValueFromValues(state, a)> bestScore:
+            score = self.computeQValueFromValues(state, a)
+            if score > bestScore:
                 bestMove = a
-                bestScore = 0
+                bestScore = score
 
         return bestMove
         

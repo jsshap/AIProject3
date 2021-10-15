@@ -56,31 +56,27 @@ class ValueIterationAgent(ValueEstimationAgent):
             self.values = self.values_prime
             #print self.values
             for s in mdp.getStates():
-                max = 0
+                #max = 0
+                options = []
+                #print s, self.mdp.getPossibleActions(s), "AJK"
                 for a in self.mdp.getPossibleActions(s):
-                    sum = 0
                     nexts = self.mdp.getTransitionStatesAndProbs(s, a)
+                    #print nexts
                     #t =  self.discount*sum([n[1]*self.values_prime[0]+ self.mdp.getReward(s,a,n[0]) for n in nexts])
                     for newState in nexts:
-                        
-                        prob = newState[1]
-                        #print prob
-                        nextState = newState[0]
-                        #print self.values[nextState]
-                        sum += prob*self.values[nextState] 
-                        #newState lasts longer before breaking
-                        #?????
-                    # print nexts
-                    # print sum
+                        options.append(newState[1]*self.values[newState[0]])
+                    # print options
+                    # print "Vals:"
+                    # print self.values
 
-                    if sum>max:
-                        max = sum
+                if not options:
+                    self.values_prime[s] = self.mdp.getReward(s,None, None)
+                    continue
+                print s
+                print options
+                maxVal = max (options)
 
-                if self.mdp.isTerminal(s):
-                    self.values_prime[s] = self.mdp.getReward(s,None,None)
-                else:
-                    print self.discount * (max) + (self.mdp.getReward(s,None, None)), "JAKE"
-                    self.values_prime[s] = self.discount * (max) + (self.mdp.getReward(s,None, None))
+                self.values_prime[s] = (self.discount) * (maxVal) + (self.mdp.getReward(s,None, None))
 
 
     def getValue(self, state):
@@ -100,11 +96,13 @@ class ValueIterationAgent(ValueEstimationAgent):
         #list of (state, prob)
         total =0
         #print succs
+        # print self.mdp.isTerminal(state), succs
         for s in succs:
             #print self.values[s[0]]
             total += s[1] * self.values[s[0]]
         #print total
         #add reward in this state and gamma * future reward
+
         currentReward = self.mdp.getReward(state, None, None)
         future = self.discount * total
         return future + currentReward
@@ -125,7 +123,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         bestMove = None
         actions = self.mdp.getPossibleActions(state)
         for a in actions:
-            score = self.computeQValueFromValues(state, a)
+            score = self.getQValue(state, a)
             if score > bestScore:
                 bestMove = a
                 bestScore = score

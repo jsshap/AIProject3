@@ -63,7 +63,7 @@ class QLearningAgent(ReinforcementAgent):
         """
         "*** YOUR CODE HERE ***"
         succs= state.getSuccessors()
-        print succs
+        
         util.raiseNotDefined()
 
     def computeActionFromQValues(self, state):
@@ -74,7 +74,7 @@ class QLearningAgent(ReinforcementAgent):
         """
         "*** YOUR CODE HERE ***"
         succs= state.getSuccessors()
-        print "HERE"
+        
         print succs
         
         util.raiseNotDefined()

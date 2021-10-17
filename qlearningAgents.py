@@ -75,7 +75,6 @@ class QLearningAgent(ReinforcementAgent):
         "*** YOUR CODE HERE ***"
         succs= state.getSuccessors()
         
-        print succs
         
         util.raiseNotDefined()
 

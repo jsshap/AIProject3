@@ -43,7 +43,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
 
-        self.values_prime = self.values
+        self.values_prime = self.values.copy()
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
@@ -53,30 +53,34 @@ class ValueIterationAgent(ValueEstimationAgent):
         #     self.iterations += 2
 
         for i in range (self.iterations):
-            self.values = self.values_prime
-            #print self.values
+            #update the values
+            
+            #iterate through states
             for s in mdp.getStates():
                 #max = 0
                 options = []
-                #print s, self.mdp.getPossibleActions(s), "AJK"
-                for a in self.mdp.getPossibleActions(s):
-                    nexts = self.mdp.getTransitionStatesAndProbs(s, a)
-                    #print nexts
-                    #t =  self.discount*sum([n[1]*self.values_prime[0]+ self.mdp.getReward(s,a,n[0]) for n in nexts])
-                    for newState in nexts:
-                        options.append(newState[1]*self.values[newState[0]])
-                    # print options
-                    # print "Vals:"
-                    # print self.values
-
-                if not options:
+                #iterate over actions
+                if self.mdp.isTerminal(s):
                     self.values_prime[s] = self.mdp.getReward(s,None, None)
                     continue
-                print s
-                print options
+                tot = 0
+                for a in self.mdp.getPossibleActions(s):
+                    nexts = self.mdp.getTransitionStatesAndProbs(s, a)
+                    #for each action, calcuate value*probability of each possible successor
+                    sum = 0
+                    for newState in nexts:
+                        #newState: (state,probability)
+                        #options.append(newState[1]*self.values[newState[0]])
+                        sum += self.discount * newState[1]*self.values[newState[0]]
+                    options.append(sum)
+    
+
+                #take the max
                 maxVal = max (options)
 
-                self.values_prime[s] = (self.discount) * (maxVal) + (self.mdp.getReward(s,None, None))
+                self.values_prime[s] =  (maxVal) + (self.mdp.getReward(s,None, None))
+            self.values = self.values_prime.copy()
+            #self.values = self.values_prime.copy()
 
 
     def getValue(self, state):
@@ -119,12 +123,12 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        bestScore = 0
+        bestScore = None
         bestMove = None
         actions = self.mdp.getPossibleActions(state)
         for a in actions:
             score = self.getQValue(state, a)
-            if score > bestScore:
+            if bestScore is None or score > bestScore:
                 bestMove = a
                 bestScore = score
 

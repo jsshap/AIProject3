@@ -71,14 +71,14 @@ class ValueIterationAgent(ValueEstimationAgent):
                     for newState in nexts:
                         #newState: (state,probability)
                         #options.append(newState[1]*self.values[newState[0]])
-                        sum += self.discount * newState[1]*self.values[newState[0]]
+                        sum +=  newState[1]*self.values[newState[0]]
                     options.append(sum)
     
 
                 #take the max
                 maxVal = max (options)
 
-                self.values_prime[s] =  (maxVal) + (self.mdp.getReward(s,None, None))
+                self.values_prime[s] =  self.discount *(maxVal) + (self.mdp.getReward(s,None, None))
             self.values = self.values_prime.copy()
             #self.values = self.values_prime.copy()
 

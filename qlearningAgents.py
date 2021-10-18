@@ -82,7 +82,7 @@ class QLearningAgent(ReinforcementAgent):
         "*** YOUR CODE HERE ***" #this is bad code, maybe we will change
 
         bestScore = self.computeValueFromQValues(state)
-        if bestScore == 0.0:
+        if not self.getLegalActions(state):
           #no legal actions
           return None
         actions = self.getLegalActions(state)

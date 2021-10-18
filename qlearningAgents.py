@@ -70,7 +70,7 @@ class QLearningAgent(ReinforcementAgent):
         else:
           options = []
           for a in actions:
-            options.append(self.QValues[(state,a)])
+            options.append(self.getQValue(state,a))
           return max (options)
 
     def computeActionFromQValues(self, state):
@@ -87,7 +87,7 @@ class QLearningAgent(ReinforcementAgent):
           return None
         actions = self.getLegalActions(state)
         for a in actions:
-          if self.QValues[(state, a)] == bestScore:
+          if self.getQValue(state, a) == bestScore:
             return a
 
           
@@ -128,7 +128,7 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        oldUtil = self.QValues[(state, action)]
+        oldUtil = self.getQValue(state, action)
         alpha = self.alpha
         delta = self.discount
         future = self.computeValueFromQValues(nextState)
@@ -198,17 +198,37 @@ class ApproximateQAgent(PacmanQAgent):
           where * is the dotProduct operator
         """
         "*** YOUR CODE HERE ***"
-        features = SimpleExtractor.getFeatures(state, action)
-        return self.QValues * features
+
+        features = self.featExtractor.getFeatures(state, action)
+        
+        #features = FeatureExtractor.getFeatures(state, action)
+
+        toRet = self.weights * features
+
+        return toRet
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
         "*** YOUR CODE HERE ***"
-        
-        # for w in self.QValues.keys():
-        #   self.QValues[w] = self.alpha * (reward + self.discount*)
+        r = reward
+        Q_of_sa= self.getQValue(state,action)
+
+        max = None
+        if not self.getLegalActions(nextState):
+          max = self.getQValue(nextState, action)
+          
+        for a in self.getLegalActions(nextState):
+          val = self.getQValue(nextState, a)
+          if max is None or val > max:
+            max = val
+
+        difference = (r + self.discount*max - Q_of_sa)
+
+        features = self.featExtractor.getFeatures(state, action)
+        for f in features:
+          self.weights[f] = self.alpha * difference * features[f]
 
     def final(self, state):
         "Called at the end of each game."

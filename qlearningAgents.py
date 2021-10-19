@@ -200,11 +200,9 @@ class ApproximateQAgent(PacmanQAgent):
         "*** YOUR CODE HERE ***"
 
         features = self.featExtractor.getFeatures(state, action)
-        
-        #features = FeatureExtractor.getFeatures(state, action)
 
-        toRet = self.weights * features
-
+        toRet = self.weights.__mul__(features)
+      
         return toRet
 
     def update(self, state, action, nextState, reward):
@@ -214,21 +212,14 @@ class ApproximateQAgent(PacmanQAgent):
         "*** YOUR CODE HERE ***"
         r = reward
         Q_of_sa= self.getQValue(state,action)
+        weights = self.getWeights()
+        max = self.computeValueFromQValues(nextState)
+        difference = (r + self.discount * max) - Q_of_sa
 
-        max = None
-        if not self.getLegalActions(nextState):
-          max = self.getQValue(nextState, action)
-          
-        for a in self.getLegalActions(nextState):
-          val = self.getQValue(nextState, a)
-          if max is None or val > max:
-            max = val
-
-        difference = (r + self.discount*max - Q_of_sa)
-
+        #print type(state)
         features = self.featExtractor.getFeatures(state, action)
         for f in features:
-          self.weights[f] = self.alpha * difference * features[f]
+          weights[f] = weights[f] + (self.alpha * difference * features[f])
 
     def final(self, state):
         "Called at the end of each game."
